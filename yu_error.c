@@ -1,5 +1,5 @@
 #include "yu.h"
-#include "error.h"
+#include "yu_error.h"
 
 /* 本文件定义常见错误，并处理之 */
 
@@ -21,5 +21,6 @@ int yu_err (int err)
       printf (_("Unknown error resson!\n"));
       break;
     }
+
   return err;
 }

@@ -56,3 +56,11 @@ typedef struct
 } YuConfig;
 
 
+
+// 默认配置 (DF = DEFAULT)
+#define DF_YUCONFIG_FILE "/etc/yu/yu.conf"
+
+#define DF_YUCONFIG_OPT_REPOMD "repomd.xml"
+#define DF_YUCONFIG_OPT_CACHEDIR "/var/cache/yum"
+#define DF_YUCONFIG_OPT_KEEPCACHE 0
+#define DF_YUCONFIG_OPT_DEBUGLEVEL 1

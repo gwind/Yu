@@ -1,5 +1,4 @@
 #include "yu.h"
-#include "usage.h"
 
 
 // 处理命令行参数可参考 : http://www.gnu.org/s/libc/manual/html_node/Getopt-Long-Option-Example.html
@@ -31,7 +30,7 @@ static struct option const long_opts[] = {
 // 处理命令行参数
 int yu_main_opt (int argc, char **argv, YuConfig *yuconfig) 
 {
-  int ret, c;
+  int ret=0, c=0;
   YuOpt *yuopt;
   const char * const short_options ="c:u:hs:bl:V";
 
@@ -58,27 +57,22 @@ int yu_main_opt (int argc, char **argv, YuConfig *yuconfig)
       switch (c)
         {
         case 0:
-          /* If this option set a flag, do nothing else now. */
           printf ("get the '--verbose'\n");
           break;
         case 'c' :
-          printf ("[调试] 指定配置文件: %s\n", optarg);
           strcpy (yuconfig->file, optarg);
           break;
         case 'h' :
-          usage (0);
-          ret = 0;
+          ret = -1;
           break;
         case 'V' :
           printf (_("%s : Version %s\n"), PROGRAME_NAME, VERSION);
-          ret = 0;
           break;
         case 'u':
-          printf ("get the '--baseurl' : %s\n", optarg);
+          printf ("[调试] baseurl : %s\n", optarg);
           break;
         default :
-          usage (1);
-          ret = 1;
+          ret = -2;
           break;
         }
     }
@@ -87,11 +81,10 @@ int yu_main_opt (int argc, char **argv, YuConfig *yuconfig)
   if (verbose_flag)
     puts ("verbose flag is set");
 
-
-  if (ret != 0)
-    return optind;
+  if (ret < 0)
+    return ret;
   else
-    return -1;
+    return optind;
 }
 
 

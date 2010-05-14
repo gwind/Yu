@@ -1,12 +1,11 @@
 #include "yu.h"
-#include "usage.h"
 #include "commands/download.h"
 
 // 分配命令
 int yu_cmd_dispatcher (int argc, char **argv)
 {
   if (argc < 1)
-    usage (1);
+    return -1;
 
   // update
   if (0 == strcmp(argv[0], "update")) {
@@ -41,7 +40,5 @@ int yu_cmd_dispatcher (int argc, char **argv)
 
   // 如果到这里，说明遇到一个我们还没有支持的命令
   printf (_("I don't know the command: %s\n"), argv[0]);
-  usage (1);
-
-  return 0; // 我正在返回还是不返回间徘徊
+  return -2;
 }
