@@ -34,7 +34,7 @@ extern int yu_read_config (YuConfig *yuconfig)
   while ((ret = fgets (line, LINE_LENGTH_MAX, fp)) != NULL)
     {
       index ++;
-      printf ("[%d] %s", index, line);
+      //printf ("[%d] %s", index, line);
 
       // 将行中的空白字符过滤掉，返回值非0就继续下一行
       // 遇到注释也跳过
@@ -101,7 +101,7 @@ __yu_config_do_main (YuConfig *yuconfig, FILE *fp, char *line, int *index)
   while (fgets (line, LINE_LENGTH_MAX, fp) != NULL)
     {
       (*index) ++;
-      printf ("[%d] %s", *index, line);
+      //printf ("[%d] %s", *index, line);
       if (__yu_line_delete_white_space (line) != 0)
         continue;
       
@@ -205,7 +205,7 @@ __yu_config_do_each_repo (YuRepo *repo, FILE *fp, char *line, int *index)
   while (fgets (line, LINE_LENGTH_MAX, fp) != NULL)
     {
       (*index) ++;
-      printf ("[%d] %s", *index, line);
+      //printf ("[%d] %s", *index, line);
       if (__yu_line_delete_white_space (line) != 0)
         continue;
       

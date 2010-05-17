@@ -26,7 +26,10 @@ int main (int argc, char **argv)
   if (myoptind < 0)
     {
       if (myoptind == -1)
-        usage ();
+        {
+          usage ();
+          return 0;
+        }
       else
         return yu_err (YU_OPT_ERR);
     }
@@ -39,11 +42,11 @@ int main (int argc, char **argv)
 
 
   // 处理完命令行选项，并读完配置文件，在这里 DEBUG 配置信息合适
-  yu_print_struc_YuConfig (yuconfig);
+  //yu_print_struc_YuConfig (yuconfig);
 
 
   // 处理剩余的命令行参数，未处理参数个数为 argc - optind
-  printf ("argc=%d, myoptind=%d\n", argc, myoptind);
+  //printf ("argc=%d, myoptind=%d\n", argc, myoptind);
   ret = yu_cmd_dispatcher (argc - myoptind, argv + myoptind);
   if (ret < 0)
     usage ();

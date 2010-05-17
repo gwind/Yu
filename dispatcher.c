@@ -1,5 +1,6 @@
 #include "yu.h"
 #include "commands/download.h"
+#include "commands/mirror.h"
 
 // 分配命令
 int yu_cmd_dispatcher (int argc, char **argv)
@@ -35,7 +36,7 @@ int yu_cmd_dispatcher (int argc, char **argv)
   // mirror
   if (0 == strcmp (argv[0], "mirror")) {
     printf ("[Command] mirro\n");
-    return 0;
+    return yu_cmd_mirror (argc - 1, argv);
   }
 
   // 如果到这里，说明遇到一个我们还没有支持的命令
