@@ -45,7 +45,6 @@ extern int yu_read_config (YuConfig *yuconfig)
       pstr = strstr (line, "[main]");
       if (pstr != NULL)
         {
-          printf ("[调试] 处理 [main] ...\n");
           // 思来想去还是把 line 通过指针传递进去方便，
           // 这样能保存未修改的但是已经读取的行
           __yu_config_do_main (yuconfig, fp, line, &index);
@@ -55,7 +54,6 @@ extern int yu_read_config (YuConfig *yuconfig)
     dorepo:
       if (line[0] == '[')
         {
-          printf ("[调试] 处理 repos ...\n");
           if (__yu_config_do_repo (yuconfig, fp, line, &index) == 0)
             goto dorepo; 
         }

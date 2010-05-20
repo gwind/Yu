@@ -35,7 +35,6 @@ int yu_cmd_dispatcher (int argc, char **argv)
 
   // mirror
   if (0 == strcmp (argv[0], "mirror")) {
-    printf ("[Command] mirro\n");
     return yu_cmd_mirror (argc - 1, argv);
   }
 

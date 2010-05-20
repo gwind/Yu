@@ -1,3 +1,5 @@
 cscope.out
+test*
 *.o
 yu
+update_pkgs*

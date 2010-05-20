@@ -87,7 +87,16 @@ yu_dl_resume_and_progress_bar (char *url,
   curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, fdata);
 
   // 设置执行开始时间
-  printf ("%s                  ",save_name);
+  //printf ("%s                  ", save_name);
+  /*
+  char *pstr=NULL;
+  pstr = strrchr (save_name, '/');
+  printf ("%s                  ", pstr+1);
+  */
+  fflush (stdout); // 将现有的缓冲区立即输出更友好
+  printf ("    "
+          "       "
+          "     ");
   fdata->start = time(&start_sec);
   ret = curl_easy_perform (curl);
 
@@ -101,6 +110,7 @@ yu_dl_resume_and_progress_bar (char *url,
 
   fclose (fp);
   curl_easy_cleanup (curl);
+  free(fdata);
   
   return 0;
 }
@@ -142,7 +152,9 @@ __yu_dl_progress (//void *x,
       double ture_t = t + fdata->size;
       double speed;
       speed = (double)d/((now_sec - fdata->start)*1024);
-      printf ("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+      printf ("\b\b\b"
+              "\b\b\b\b\b\b\b"
+              "\b\b\b\b\b");
       if (speed > 1000.0)
         printf ("%6.1fMB/s", speed/1024);
       else

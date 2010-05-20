@@ -26,14 +26,11 @@ int yu_cmd_download (int argc, char **argv)
   //printf ("[get] %s\n", url);
   yu_dl_resume_and_progress_bar (url, save_name);
 
-  strcpy (url, "http://download.turbolinux.com.cn/TMS%3a/2.0%3a/LessWatts/standard/src/tms-release-2.0-3.9.src.rpm");
-  strcpy (save_name, "tms-release-2.0-3.9.src.rpm");
+  strcpy (url, "http://download.turbolinux.com.cn/TMS%3a/2.0%3a/LessWatts/standard/src/kernel-2.6.30.1-6.1.3.src.rpm");
+  strcpy (save_name, "kernel-2.6.30.1-6.1.3.src.rpm");
   //printf ("[get] %s\n", url);
   yu_dl_resume_and_progress_bar (url, save_name);
 
-  strcpy (url, "http://127.0.0.1/createrepo/AdobeReader_chs-8.1.7-1.i486.tar.gz");
-  strcpy (save_name, "AdobeReader_chs-8.1.7-1.i486.tar.gz");
-  yu_dl_resume_and_progress_bar (url, save_name);
 
   strcpy (url, "http://download.turbolinux.com.cn/TMS%3a/2.0%3a/LessWatts/standard/src/xfce4-desktop-branding-moblin-0.6-3.2.src.rpm");
   strcpy (save_name, "xfce4-desktop-branding-moblin-0.6-3.2.src.rpm");
