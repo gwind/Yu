@@ -33,15 +33,11 @@ extern void yu_str_replace (char *str,
 extern int yu_decompress_file (char *file)
 {
   char cmd[LINE_LENGTH_MAX]={'\0'};
-  /*
-  char *cmd;
-  printf ("strlen(file)=%d\n", strlen(file));
-  cmd = (char *)malloc(strlen(file)+12);
-  */
+  // 很多系统 bunzip2 gunzip 路径不标准
   if (0 != strstr (file, ".bz2"))
-    strcpy (cmd, "/bin/bunzip2 ");
+    strcpy (cmd, "bunzip2 ");
   if (0 != strstr (file, ".gz"))
-    strcpy (cmd, "/bin/gunzip ");
+    strcpy (cmd, "gunzip ");
 
   strcat (cmd, file);
   if (0 != strstr(cmd, "bin") && 0 != system (cmd))

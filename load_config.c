@@ -30,6 +30,10 @@ extern int yu_read_config (YuConfig *yuconfig)
       return 1;
     }
 
+  // 此处一个故事就是未初始化的值都是不稳定的，我在 Ubuntu 10.04 上
+  // 不做初始化就可以，在 GTES11.3(RHEL5.4) 上就出错了。
+  yuconfig->repo = NULL;
+
   //ret = fgets (line, LINE_LENGTH_MAX, fp);
   while ((ret = fgets (line, LINE_LENGTH_MAX, fp)) != NULL)
     {
@@ -179,6 +183,7 @@ __yu_config_do_repo (YuConfig *yuconfig, FILE *fp, char *line, int *index)
     swaprepo = swaprepo->next;
   swaprepo->next = tmprepo;
 
+  free (swaprepo);
   return 0;
 }
 
