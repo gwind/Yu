@@ -148,7 +148,7 @@ extern int yu_make_sure_dir_exist (char *dir) {
 extern char * yu_make_sure_last_slash_exist (char *str)
 {
   int len = strlen(str);
-  if (str[len - 1] == '\0')
+  if (str[len - 1] == '/')
     return str;
   char *tmpstr = malloc (len + 1);
   strcpy (tmpstr, str);

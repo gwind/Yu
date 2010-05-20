@@ -1,5 +1,6 @@
 cscope.out
-test*
+test
+test.o
 *.o
 yu
 update_pkgs*

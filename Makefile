@@ -67,5 +67,6 @@ clean:
 	-/bin/rm *.o \
            $(commands_dir)/*.o
 	-/bin/rm $(PROGRAME_NAME)
+	-/bin/rm cscope.out
 
 
