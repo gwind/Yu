@@ -169,17 +169,14 @@ extern char * yu_make_sure_last_slash_exist (char *str)
 {
   int len = strlen(str);
   char *tmpstr=NULL;
+  tmpstr = malloc (len + 2);
   if (str[len - 1] != '/')
     {
-      tmpstr = malloc (len + 1);
       strcpy (tmpstr, str);
       strcat (tmpstr, "/");
     }
   else
-    {
-      tmpstr = malloc (len);
-      strcpy (tmpstr, str);
-    }
+    strcpy (tmpstr, str);
   return tmpstr;
 }
 

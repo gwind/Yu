@@ -16,6 +16,14 @@
 #include <curl/easy.h>
 
 
+typedef struct 
+{
+  double size;
+  char name[LINE_LENGTH_MAX];
+  clock_t start;
+} YuDlFileData;
+
+
 static size_t 
 __yu_dl_write (char *ptr, size_t size,
                size_t nmemb, void *stream);

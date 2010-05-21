@@ -78,7 +78,9 @@ yu_sql_mirror_primary (char *the_baseurl,
             strcpy (sha_type, dbResult[index]);
 
           if (! strcmp (dbResult[j], "location_base") &&
-              (dbResult[index] != NULL))
+              (dbResult[index] != NULL) &&
+              (dbResult[index][0] != '=') &&  // 还真遇到有这个例子 "=/root/lab/createrepo/"
+              (dbResult[index][0] != '/'))
             strcpy (location_base, dbResult[index]);
 
           if (! strcmp (dbResult[j], "location_href"))

@@ -199,6 +199,7 @@ __yu_xml_dl_and_decompress(char *baseurl,
   strcat (url, href);
   printf ("Get %s ", strrchr(url, '/') + 1);
   ret = yu_dl_resume_and_progress_bar (url, local_file);
+  printf ("\n");
   if (ret != 0)
     return ret;
   ret = yu_decompress_file (local_file);
