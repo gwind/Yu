@@ -66,15 +66,26 @@ static int __yu_mirror (char *url, char *localdir)
   if (0 != yu_xml_update_repodata (url, repodata_dir))
     printf ("Update have a error!\n");
 
-  /*
-  repodata_dir = yu_concatenation_str (localdir, "/repodataa");
-  printf (_("Updating repodata : %s ...\n"), repodata_dir);
-  if (0 != yu_xml_update_repodata (url, repodata_dir))
-    printf ("Update have a error!\n");
-  */
- 
-  yu_sql_mirror_primary (url, localdir);
 
+  // 判断 primary data name
+  char *primary_data_name=NULL;
+  primary_data_name = yu_get_filename_in_dir (repodata_dir,"primary.sqlite");
+  if (primary_data_name != NULL)
+    yu_sql_mirror_primary (url, localdir, primary_data_name);
+  else
+    {
+      primary_data_name = yu_get_filename_in_dir (repodata_dir,"primary.xml");
+
+      if (primary_data_name == NULL)
+        {
+          printf (_("Have not found primary db name!\n"));
+          return 1;
+        }
+
+      printf ("Have not support download from xml data!\n");
+    }
+
+  free (primary_data_name);
   free (repodata_dir);
   return 0;
 }

@@ -9,7 +9,9 @@
 
 
 extern int
-yu_sql_mirror_primary (char *the_baseurl, char *the_repodir)
+yu_sql_mirror_primary (char *the_baseurl, 
+                       char *the_repodir,
+                       char *primary_data_name)
 {
   char *baseurl, *repodir=NULL;
   baseurl = yu_make_sure_last_slash_exist (the_baseurl);
@@ -35,7 +37,9 @@ yu_sql_mirror_primary (char *the_baseurl, char *the_repodir)
   char save_file[LINE_LENGTH_MAX]={'\0'};
   char location_base[LINE_LENGTH_MAX]={'\0'};
   char location_href[LINE_LENGTH_MAX]={'\0'};
-  yu_concatenation_str_together (dl_file, repodir, "repodata/primary.sqlite");
+  strcpy (dl_file, repodir);
+  strcat (dl_file, "repodata/");
+  strcat (dl_file, primary_data_name);
 
   if (0 != access (dl_file, R_OK))
     {

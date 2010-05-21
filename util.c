@@ -1,5 +1,7 @@
 #include <sys/stat.h>
 #include <unistd.h> // access
+#include <dirent.h>
+#include <fcntl.h>
 
 #include "yu.h"
 #include "util.h"
@@ -33,19 +35,41 @@ extern void yu_str_replace (char *str,
 extern int yu_decompress_file (char *file)
 {
   char cmd[LINE_LENGTH_MAX]={'\0'};
-  // 很多系统 bunzip2 gunzip 路径不标准
+
   if (0 != strstr (file, ".bz2"))
-    strcpy (cmd, "bunzip2 ");
+    {
+      if (0 != access ("/usr/bin/bunzip2", R_OK))
+        {
+          if (0 != access ("/bin/bunzip2", R_OK))
+            {
+              printf ("Have not found: bunzip2\n");
+              return 1;
+            }
+          strcpy (cmd, "/bin/bunzip2 ");
+        }
+      else
+        strcpy (cmd, "/usr/bin/bunzip2 ");
+    }
+
   if (0 != strstr (file, ".gz"))
-    strcpy (cmd, "gunzip ");
+    {
+      if (0 != access ("/bin/gunzip", R_OK))
+        {
+          if (0 != access ("/usr/bin/gunzip", R_OK))
+            {
+              printf ("Have not found: gunzip\n");
+              return 2;
+            }
+          strcpy (cmd, "/usr/bin/gunzip ");
+        }
+      else
+        strcpy (cmd, "/bin/gunzip ");
+    }
 
   strcat (cmd, file);
-  if (0 != strstr(cmd, "bin") && 0 != system (cmd))
+  if (0 != strstr(cmd, "zip") && 0 != system (cmd))
     return 1;
-  /*
-  printf ("release malloc ...\n");
-  free(cmd);
-  */
+
   return 0;
 }
 
@@ -144,11 +168,18 @@ extern int yu_make_sure_dir_exist (char *dir) {
 extern char * yu_make_sure_last_slash_exist (char *str)
 {
   int len = strlen(str);
-  if (str[len - 1] == '/')
-    return str;
-  char *tmpstr = malloc (len + 1);
-  strcpy (tmpstr, str);
-  strcat (tmpstr, "/");
+  char *tmpstr=NULL;
+  if (str[len - 1] != '/')
+    {
+      tmpstr = malloc (len + 1);
+      strcpy (tmpstr, str);
+      strcat (tmpstr, "/");
+    }
+  else
+    {
+      tmpstr = malloc (len);
+      strcpy (tmpstr, str);
+    }
   return tmpstr;
 }
 
@@ -174,3 +205,28 @@ yu_concatenation_str_together (char *str,
   return 0;
 }
 
+// 寻找目录下包含特定字符串的文件
+extern char *
+yu_get_filename_in_dir (char *dir, char *regex)
+{
+  char *name=NULL;
+  DIR *pdir=NULL;
+  struct dirent *pdirent;
+
+  if ((pdir = opendir (dir)) == NULL)
+    printf ("Open Directory Error: %s\n", dir);
+  else
+    {
+      while((pdirent = readdir(pdir)) != NULL)
+        {
+          if(strstr (pdirent->d_name, regex) != NULL)
+            {
+              name = (char *) malloc (sizeof(pdirent->d_name));
+              strcpy (name, pdirent->d_name);
+            }
+        }
+      closedir(pdir);
+    }
+
+  return name;
+}

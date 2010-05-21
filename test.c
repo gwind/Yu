@@ -1,5 +1,6 @@
 #include "yu.h"
 #include "checksum.h"
+#include "util.h"
 
 int main (int argc, char **argv)
 {
@@ -17,6 +18,8 @@ int main (int argc, char **argv)
   ret = yu_checksum_compare_file_sha(argv[2],argv[1],argv[3]);
 
   printf ("ret = %d\n", ret);
+
+  printf ("filename = %s\n", yu_get_filename_in_dir ("/tmp/lesswatts/repodata/","primary.sqlite"));
 
   return 0;
 }

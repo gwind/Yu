@@ -19,14 +19,13 @@ __yu_xml_dl_repodata (xmlDocPtr doc,
 
 static int
 __yu_xml_do_children_node_of_repomd 
-(xmlNodePtr children,
- char *baseurl,
- char *local_repodata_dir);
+(xmlNodePtr children, char *baseurl, char *local_repodata_dir);
 
 static int
 __yu_xml_dl_and_decompress(char *baseurl,
                            char *href,
                            char *local_file);
+
 
 // 更新 repodata 数据库
 extern int
@@ -139,8 +138,7 @@ __yu_xml_do_children_node_of_repomd
   char local_file[LINE_LENGTH_MAX] = {'\0'};
   char *href=NULL;
   unsigned char *sha=NULL;
-  char *sha_type;
-  sha_type = (char *) malloc (16);
+  char sha_type[16]={'\0'};
 
   // 循环判断字节点的名字，取得 "location" 和 
   // "open-checksum" 节点的信息，处理之
@@ -155,7 +153,7 @@ __yu_xml_do_children_node_of_repomd
 
     if (0==xmlStrcmp(children->name,BAD_CAST"open-checksum"))
       {
-        sha_type = (char *)xmlGetProp(children,BAD_CAST"type");
+        strcpy(sha_type, (char *)xmlGetProp(children,BAD_CAST"type"));
         sha = (unsigned char *)xmlNodeGetContent(children);
       }
 
@@ -186,7 +184,6 @@ __yu_xml_do_children_node_of_repomd
       remove (decompressed_file);
     }
 
-  free (sha_type);
   return  __yu_xml_dl_and_decompress(baseurl, href, local_file);
 }
 
