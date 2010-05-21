@@ -106,7 +106,7 @@ yu_dl_resume_and_progress_bar (char *url,
       return 1;
     }
 
-  printf ("\n");
+  //printf ("\n");
 
   fclose (fp);
   curl_easy_cleanup (curl);

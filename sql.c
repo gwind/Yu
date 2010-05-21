@@ -104,17 +104,32 @@ yu_sql_mirror_primary (char *the_baseurl,
       // 显示信息样式
       printf ("%d/%d - %s ", i+1, nRow, pstr+1);
 
+      // 如果文件不存在，先下载
       if (0 != access (save_file, R_OK))
-        {
-          yu_dl_resume_and_progress_bar (dl_file, save_file);
-          continue;
-        }
-      
+        yu_dl_resume_and_progress_bar (dl_file, save_file);
+
+      // 第一次校验
       ret = yu_checksum_compare_file_sha ((unsigned char *)sha, save_file, sha_type);
-      if (0 == ret)
-        printf ("OK\n");
-      else
-        printf ("FAILED\n");
+      if (0 != ret)
+        {
+          // 第一次校验不对，再下载一次，一般为断点恢复下载提供便利
+          yu_dl_resume_and_progress_bar (dl_file, save_file);
+          // 第二次校验
+          ret = yu_checksum_compare_file_sha ((unsigned char *)sha, save_file, sha_type);
+          if (0 != ret)
+            {
+              // 第二次校验不对就删除文件，重新下载
+              remove(save_file);
+              yu_dl_resume_and_progress_bar (dl_file, save_file);
+              // 第三次校验
+              ret = yu_checksum_compare_file_sha ((unsigned char *)sha, save_file, sha_type);
+              if (0 != ret)
+                // 第三次校验不对就直接输出 FAILED 信息
+                printf ("FAILED\n");
+            }
+        }
+
+      printf ("\n");
     }
 
  clean:
