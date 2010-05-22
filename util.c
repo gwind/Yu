@@ -2,6 +2,7 @@
 #include <unistd.h> // access
 #include <dirent.h>
 #include <fcntl.h>
+#include <regex.h>
 
 #include "yu.h"
 #include "util.h"
@@ -226,4 +227,60 @@ yu_get_filename_in_dir (char *dir, char *regex)
     }
 
   return name;
+}
+
+
+// 删除目录下是文件名匹配指定正则表达式的文件
+extern int
+yu_remove_file_in_regex (char *dir, char *regstr)
+{
+  DIR *pdir=NULL;
+  struct dirent *pdirent;
+
+  if ((pdir = opendir (dir)) == NULL)
+    {
+      printf ("Open Directory Error: %s\n", dir);
+      return 1;
+    }
+
+  int ret=0, cflags=0;
+  char ebuf[LINE_LENGTH_MAX]={'\0'}; // 存放错误信息
+  char rm_file[LINE_LENGTH_MAX]={'\0'};
+  regex_t reg;
+  regmatch_t pm[10];
+  const size_t nmatch = 10;
+  ret = regcomp (&reg, regstr, cflags);
+  if (ret != 0)
+    {
+      // regerror 设置错误信息到 ebuf
+      regerror (ret, &reg, ebuf, sizeof (ebuf));
+      fprintf (stderr, "%s: pattern '%s' \n", ebuf, regstr);
+      return 1;
+    }
+
+  while((pdirent = readdir(pdir)) != NULL)
+    {
+      ret = regexec (&reg, pdirent->d_name, nmatch, pm, 0);
+
+      if (ret == REG_NOERROR)
+        {
+          strcpy (rm_file, dir);
+          strcat (rm_file, "/");
+          strcat (rm_file, pdirent->d_name);
+          remove (rm_file);
+          continue;
+        }
+
+      if (ret == REG_NOMATCH)
+        continue;
+
+      // 到这里就是错误
+      regerror (ret, &reg, ebuf, sizeof (ebuf));
+      fprintf (stderr, "%s: regcom('%s')\n", ebuf, pdirent->d_name);
+      return 2;
+    }
+
+  regfree (&reg);
+  closedir(pdir);
+  return 0;
 }

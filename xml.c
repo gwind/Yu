@@ -15,7 +15,8 @@
 static int
 __yu_xml_dl_repodata (xmlDocPtr doc, 
                       char *baseurl,
-                      char *local_repodata_dir);
+                      char *local_repodata_dir,
+                      int data_type);
 
 static int
 __yu_xml_do_children_node_of_repomd 
@@ -47,9 +48,9 @@ yu_xml_update_repodata (char *address, char *dir)
   // 检查本地 repomd.xml 文件是否存在
   if (0 != access (local_file, R_OK))
     {
-      //printf ("Get %s ", strrchr(url, '/') + 1);
-      printf ("Get %s ", url);
+      printf ("Get %s ", strrchr(url, '/') + 1);
       yu_dl_resume_and_progress_bar (url, local_file);
+      printf ("\n");
     }
   else
     {
@@ -78,7 +79,20 @@ yu_xml_update_repodata (char *address, char *dir)
       return 1;
     }
 
-  __yu_xml_dl_repodata(doc, baseurl, local_repodata_dir);
+  ret = yu_xml_data_type_of_repomd (local_file);
+  switch (ret) 
+    {
+    case YU_REPODATA_SQLITE_DATA_TYPE:
+      printf (_("Data type of repodata is: SQLITE\n"));
+      ret = __yu_xml_dl_repodata(doc, baseurl, local_repodata_dir, YU_REPODATA_SQLITE_DATA_TYPE);
+      break;
+    case YU_REPODATA_XML_DATA_TYPE:
+      printf (_("The repomd.xml just have xml data file, could not do it now: %s\n"), local_file);
+      break;
+    case YU_REPODATA_UNKNOWN_DATA_TYPE:
+      printf (_("UNKNOWN DATA TYPE in %s.\n"), local_file);
+      break;
+    }
 
   xmlFreeDoc (doc);
   xmlCleanupParser ();
@@ -91,7 +105,8 @@ yu_xml_update_repodata (char *address, char *dir)
 static int
 __yu_xml_dl_repodata (xmlDocPtr doc, 
                       char *baseurl,
-                      char *local_repodata_dir)
+                      char *local_repodata_dir,
+                      int data_type)
 {
   xmlNodePtr root=NULL, curnode=NULL;
   char *type=NULL;
@@ -111,13 +126,24 @@ __yu_xml_dl_repodata (xmlDocPtr doc,
 
     type = (char *) xmlGetProp (curnode, BAD_CAST "type");
 
-    /*
     // 过滤不想处理的子节点
-    if ((0 != strcmp (type, "other_db")) &&
-        (0 != strcmp (type, "filelists_db")) &&
-        (0 != strcmp (type, "primary_db")))
-      continue;
-    */
+    if (data_type == YU_REPODATA_SQLITE_DATA_TYPE)
+      {
+        if ((0 != strcmp (type, "other_db")) &&
+            (0 != strcmp (type, "filelists_db")) &&
+            (0 != strcmp (type, "primary_db")) &&
+            (0 != strcmp (type, "group_gz")))
+          continue;
+      }
+
+    if (data_type == YU_REPODATA_XML_DATA_TYPE)
+      {
+        if ((0 != strcmp (type, "primary")) &&
+            (0 != strcmp (type, "filelists")) &&
+            (0 != strcmp (type, "other")) &&
+            (0 != strcmp (type, "group_gz")))
+          continue;
+      }
 
     // 处理子节点
     if (0 != __yu_xml_do_children_node_of_repomd (curnode->children, baseurl, local_repodata_dir))
@@ -208,3 +234,67 @@ __yu_xml_dl_and_decompress(char *baseurl,
 
   return 0;
 }
+
+
+/* 确定要下载的数据类型，如果有 sqlite 数据库，优先下载，
+ * 否则下载 xml 数据，如果两者都没有，就认为 repomd.xml 出错
+ */
+extern int
+yu_xml_data_type_of_repomd (char *repomd)
+{
+  xmlDocPtr doc=NULL;
+  xmlNodePtr root=NULL, curnode=NULL;
+  char *type=NULL;
+  int ret=0;
+
+  if (0 != access (repomd, R_OK))
+    {
+      printf (_("File does not exist: %s"), repomd);
+      ret = YU_REPODATA_UNKNOWN_DATA_TYPE;
+      goto clean;
+    }
+
+  xmlKeepBlanksDefault (0);
+  doc = xmlReadFile (repomd, "UTF-8", XML_PARSE_RECOVER);
+  if (doc == NULL)
+    {
+      fprintf (stderr, _("Read xml file have a error: %s\n"), repomd);
+      ret = YU_REPODATA_UNKNOWN_DATA_TYPE;
+      goto clean;
+    }
+
+  if ((root = xmlDocGetRootElement (doc)) == NULL)
+    {
+      fprintf (stderr, _("No root node have found, wrong XML file.\n"));
+      ret = YU_REPODATA_UNKNOWN_DATA_TYPE;
+      goto clean;
+    }
+
+  curnode = root->children;
+
+  do {
+    if (0 != xmlStrcmp (curnode->name, BAD_CAST "data"))
+      continue;
+
+    type = (char *) xmlGetProp (curnode, BAD_CAST "type");
+
+    if (0 == strcmp (type, "primary_db"))
+      {
+        ret = YU_REPODATA_SQLITE_DATA_TYPE;
+        break;
+      }
+
+    if (0 == strcmp (type, "primary"))
+      {
+        ret = YU_REPODATA_XML_DATA_TYPE;
+        break;
+      }
+
+  } while ((curnode  = curnode->next) != NULL);
+
+ clean:
+  xmlFreeDoc (doc);
+  xmlCleanupParser ();
+  return ret;
+}
+

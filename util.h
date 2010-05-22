@@ -11,4 +11,5 @@ extern char * yu_make_sure_last_slash_exist (char *str);
 extern char * yu_concatenation_str (char *astr, char *bstr);
 extern int yu_concatenation_str_together (char *str, char *astr, char *bstr);
 
-extern char *yu_get_filename_in_dir (char *dir, char *regex);
+extern char *yu_get_filename_in_dir (char *dir, char *norstr);
+extern int yu_remove_file_in_regex (char *dir, char *regstr);

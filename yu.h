@@ -64,3 +64,9 @@ typedef struct
 #define DF_YUCONFIG_OPT_CACHEDIR "/var/cache/yum"
 #define DF_YUCONFIG_OPT_KEEPCACHE 0
 #define DF_YUCONFIG_OPT_DEBUGLEVEL 1
+
+
+// repodata 数据的类型
+#define YU_REPODATA_UNKNOWN_DATA_TYPE 0
+#define YU_REPODATA_SQLITE_DATA_TYPE 1
+#define YU_REPODATA_XML_DATA_TYPE 2

@@ -24,7 +24,7 @@ yu_sql_mirror_primary (char *the_baseurl,
   char *pstr;
 
   
-  char *sql = "select pkgId, location_href, location_base, checksum_type from packages;";
+  char *sql = "select pkgId, name, arch, location_href, location_base, checksum_type from packages;";
   char sha[LINE_LENGTH_MAX]={'\0'};
   char sha_type[16];
 
@@ -37,6 +37,9 @@ yu_sql_mirror_primary (char *the_baseurl,
   char save_file[LINE_LENGTH_MAX]={'\0'};
   char location_base[LINE_LENGTH_MAX]={'\0'};
   char location_href[LINE_LENGTH_MAX]={'\0'};
+  char name[LINE_LENGTH_MAX/2]={'\0'};
+  char arch[16]={'\0'};
+  char regstr[LINE_LENGTH_MAX/2]={'\0'};
   strcpy (dl_file, repodir);
   strcat (dl_file, "repodata/");
   strcat (dl_file, primary_data_name);
@@ -86,6 +89,12 @@ yu_sql_mirror_primary (char *the_baseurl,
           if (! strcmp (dbResult[j], "location_href"))
             strcpy(location_href, dbResult[index]);
 
+          if (! strcmp (dbResult[j], "name"))
+            strcpy (name, dbResult[index]);
+
+          if (! strcmp (dbResult[j], "arch"))
+            strcpy (arch, dbResult[index]);
+
           ++ index;
         }
 
@@ -99,16 +108,31 @@ yu_sql_mirror_primary (char *the_baseurl,
 
       // 确定 save_file
       pstr = strrchr(location_href, '/');
-      if (NULL == pstr)
+      if (NULL != pstr)
+        pstr = pstr + 1;
+      else
         pstr = location_href;
-      yu_concatenation_str_together(save_file,repodir,pstr+1);
+      yu_concatenation_str_together(save_file,repodir,pstr);
 
       // 显示信息样式
-      printf ("%d/%d - %s ", i+1, nRow, pstr+1);
+      printf ("%d/%d - %s ", i+1, nRow, pstr);
 
       // 如果文件不存在，先下载
       if (0 != access (save_file, R_OK))
-        yu_dl_resume_and_progress_bar (dl_file, save_file);
+        {
+          // 还没有想到一个更好的同步方法，先用这
+          if (strlen(name) == 0)
+            printf(_("SQL error: no 'name' found!\n"));
+          else
+            {
+              strcpy (regstr, name);
+              strcat (regstr, "-[0-9].*");
+              strcat (regstr, arch);
+              strcat (regstr, ".*");
+              yu_remove_file_in_regex (repodir, regstr);
+            }
+          yu_dl_resume_and_progress_bar (dl_file, save_file);
+        }
 
       // 第一次校验
       ret = yu_checksum_compare_file_sha ((unsigned char *)sha, save_file, sha_type);
