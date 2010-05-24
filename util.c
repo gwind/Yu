@@ -258,7 +258,7 @@ yu_remove_file_in_regex (char *dir, char *regstr)
       return 1;
     }
 
-  while((pdirent = readdir(pdir)) != NULL)
+  while ((pdirent = readdir(pdir)) != NULL)
     {
       ret = regexec (&reg, pdirent->d_name, nmatch, pm, 0);
 

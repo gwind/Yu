@@ -1,12 +1,17 @@
 #include <unistd.h>
 #include <time.h>
 #include <sqlite3.h>
+#include <dirent.h>
 
 #include "yu.h"
 #include "util.h"
 #include "dl.h"
 #include "checksum.h"
+#include "sql.h"
 
+
+static int
+__yu_callback (int *remove_flag, int argc, char **argv, char **value);
 
 extern int
 yu_sql_mirror_primary (char *the_baseurl, 
@@ -23,7 +28,6 @@ yu_sql_mirror_primary (char *the_baseurl,
   int i,j,ret,index,nRow,nColumn;
   char *pstr;
 
-  
   char *sql = "select pkgId, name, arch, location_href, location_base, checksum_type from packages;";
   char sha[LINE_LENGTH_MAX]={'\0'};
   char sha_type[16];
@@ -158,10 +162,92 @@ yu_sql_mirror_primary (char *the_baseurl,
       printf ("\n");
     }
 
+
+  // 更新完毕后，开始删除本地旧文件
+  printf ("Remove old file in the %s\n", repodir);
+  strcpy (dl_file, repodir);
+  strcat (dl_file, "repodata/");
+  strcat (dl_file, primary_data_name);
+  yu_remove_file_doesnt_in_primarydb (repodir, dl_file);
+
  clean:
   sqlite3_free_table (dbResult);
   sqlite3_close (db);
   free (baseurl);
   free (repodir);
+  return 0;
+}
+
+
+
+// 从 primary 的 sqlite 数据库读取信息，删除本地目录下旧文件
+extern int
+yu_remove_file_doesnt_in_primarydb (char *dir, char *dbfile)
+{
+  DIR *pdir=NULL;
+  struct dirent *pdirent;
+  sqlite3 *db;  
+  char *errmsg = NULL;
+  char sql[LINE_LENGTH_MAX] = {'\0'};
+  int ret=0;
+
+  if (0 != access (dbfile, R_OK))
+    {
+      printf (_("The file doesn't exist: %s\n"), dbfile);
+      return 1;
+    }
+
+  if ((pdir = opendir (dir)) == NULL)
+    {
+      printf (_("Open Directory Error: %s\n"), dir);
+      return 2;
+    }
+
+  ret = sqlite3_open (dbfile, &db);
+  if (ret)
+    {
+      fprintf (stderr, "Can't open database %s: %s\n",
+               dbfile, sqlite3_errmsg(db));
+      sqlite3_close(db);
+      return 2;
+    }
+
+  int remove_flag=0;
+  char file[LINE_LENGTH_MAX]={'\0'};
+  while ((pdirent = readdir (pdir)) != NULL)
+    {
+      if (! strcmp (pdirent->d_name, ".") ||
+          ! strcmp (pdirent->d_name, "..") ||
+          ! strcmp (pdirent->d_name, "repodata"))
+        continue;
+      //.separator "-"; select name,version,release,arch from packages;
+      sprintf(sql, "select location_href from packages where location_href like \"%%%s\";", pdirent->d_name);
+      //printf ("sql = %s\n", sql);
+      // 这是一个 hack 的方法，只要 sqlite3_exec 查询到结果就调用回调函数，就可以在其内设置 remove_flag 
+      remove_flag = 1;
+      ret = sqlite3_exec(db, sql, __yu_callback, &remove_flag, &errmsg);
+      if (SQLITE_OK != ret)
+        printf (_("Search sql error: %s\n"), errmsg);
+
+      if (remove_flag == 1)
+        {
+          strcpy (file, dir);
+          strcat (file, "/");
+          strcat (file, pdirent->d_name);
+          printf ("Remove: %s\n", file);
+          remove(file);
+        }
+    }
+
+  sqlite3_close (db);
+  return 0;
+}
+
+
+// sqlite3_exec 的回调函数
+static int
+__yu_callback (int *remove_flag, int argc, char **argv, char **value)
+{
+  *remove_flag=0;
   return 0;
 }
