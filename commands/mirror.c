@@ -56,9 +56,12 @@ extern int yu_cmd_mirror (int argc, char **argv)
  */
 static int __yu_mirror (char *url, char *localdir)
 {
-  char *repodata_dir=NULL;
-  repodata_dir = yu_concatenation_str (localdir, "/repodata/");
-  yu_str_replace (repodata_dir, "//", "/"); //指针字符串刚够长
+  char repodata_dir[LINE_LENGTH_MAX]={'\0'};
+  strcpy (repodata_dir, localdir);
+  strcat (repodata_dir, "/");
+  strcat (repodata_dir, YU_MIRROR_REPODATA_NAME);
+  strcat (repodata_dir, "/");
+  yu_str_replace (repodata_dir, "//", "/");
   printf (_("Run: %s mirror %s %s\n"), 
           PROGRAME_NAME, url, localdir);
 
@@ -86,7 +89,6 @@ static int __yu_mirror (char *url, char *localdir)
     }
 
   free (primary_data_name);
-  free (repodata_dir);
   return 0;
 }
 

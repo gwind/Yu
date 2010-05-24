@@ -45,7 +45,9 @@ yu_sql_mirror_primary (char *the_baseurl,
   char arch[16]={'\0'};
   char regstr[LINE_LENGTH_MAX/2]={'\0'};
   strcpy (dl_file, repodir);
-  strcat (dl_file, "repodata/");
+  strcat (dl_file, "/");
+  strcat (dl_file, YU_MIRROR_REPODATA_NAME);
+  strcat (dl_file, "/");
   strcat (dl_file, primary_data_name);
 
   if (0 != access (dl_file, R_OK))
@@ -166,7 +168,9 @@ yu_sql_mirror_primary (char *the_baseurl,
   // 更新完毕后，开始删除本地旧文件
   printf ("Remove old file in the %s\n", repodir);
   strcpy (dl_file, repodir);
-  strcat (dl_file, "repodata/");
+  strcat (dl_file, "/");
+  strcat (dl_file, YU_MIRROR_REPODATA_NAME);
+  strcat (dl_file, "/");
   strcat (dl_file, primary_data_name);
   yu_remove_file_doesnt_in_primarydb (repodir, dl_file);
 
@@ -218,7 +222,8 @@ yu_remove_file_doesnt_in_primarydb (char *dir, char *dbfile)
     {
       if (! strcmp (pdirent->d_name, ".") ||
           ! strcmp (pdirent->d_name, "..") ||
-          ! strcmp (pdirent->d_name, "repodata"))
+          ! strcmp (pdirent->d_name, "repodata") ||
+          ! strcmp (pdirent->d_name, YU_MIRROR_REPODATA_NAME))
         continue;
       //.separator "-"; select name,version,release,arch from packages;
       sprintf(sql, "select location_href from packages where location_href like \"%%%s\";", pdirent->d_name);
